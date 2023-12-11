@@ -51,8 +51,6 @@ def part1():
     q = collections.deque([(s, 0)])
     while q:
         point, dist = q.popleft()
-        if point is visited:
-            continue
         visited.add(point)
         dists[point] = dist
 
@@ -64,8 +62,54 @@ def part1():
     return max(dists.values())
 
 
+def intersections(graph, visited, point):
+    res = 0
+    for k in range(point[1]):
+        if (point[0], k) in visited:
+            line = graph[point[0]]
+            if line[k] in {"F", "7", "|"}:
+                res += 1
+    return res
+
+
 def part2():
-    pass
+    graph = []
+    with open("input.txt", "r") as f:
+        lines = list(map(lambda s: s.strip(), f.readlines()))
+        for line in lines:
+            graph.append([c for c in line])
+
+    s = None
+    for i in range(len(graph)):
+        for j in range(len(graph[i])):
+            if graph[i][j] == 'S':
+                s = (i, j)
+                break
+
+    graph[s[0]][s[1]] = "J"
+
+    visited = set()
+    dists = {}
+    q = collections.deque([(s, 0)])
+    while q:
+        point, dist = q.popleft()
+        visited.add(point)
+        dists[point] = dist
+
+        for n in neighbors(graph, point):
+            if n in visited:
+                continue
+            q.append((n, dist + 1))
+
+    res = 0
+    for i, line in enumerate(graph):
+        for j in range(len(line)):
+            if not (i, j) in visited:
+                intrs = intersections(graph, visited, (i, j))
+                if intrs % 2 == 1:
+                    res += 1
+
+    return res
 
 
 if __name__ == "__main__":
